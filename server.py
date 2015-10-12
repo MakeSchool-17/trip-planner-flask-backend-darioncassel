@@ -31,6 +31,20 @@ class Trip(Resource):
         else:
             return trip
 
+    def put(self, trip_id):
+        trip_collection = app.db.trips
+
+        trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
+        if trip is None:
+            response = jsonify(data=[])
+            response.status_code = 404
+            return response
+        else:
+            result = trip_collection.replace_one({"_id": ObjectId(trip_id)},
+                                                 request.json)
+            return result.raw_result
+
+
 # Add REST resource to API
 api.add_resource(Trip, '/trips/', '/trips/<string:trip_id>')
 
