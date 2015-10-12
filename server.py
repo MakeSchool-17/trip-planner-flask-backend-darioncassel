@@ -33,7 +33,6 @@ class Trip(Resource):
 
     def put(self, trip_id):
         trip_collection = app.db.trips
-
         trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
         if trip is None:
             response = jsonify(data=[])
@@ -47,7 +46,25 @@ class Trip(Resource):
                 return trip
             else:
                 response = jsonify(data=[])
-                response.status_code = 204
+                response.status_code = 500
+                return response
+
+    def delete(self, trip_id):
+        trip_collection = app.db.trips
+        trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
+        if trip is None:
+            response = jsonify(data=[])
+            response.status_code = 404
+            return response
+        else:
+            result = trip_collection.delete_one({"_id": ObjectId(trip_id)})
+            if result.deleted_count == 1:
+                response = jsonify(data=[])
+                response.status_code = 200
+                return response
+            else:
+                response = jsonify(data=[])
+                response.status_code = 500
                 return response
 
 
