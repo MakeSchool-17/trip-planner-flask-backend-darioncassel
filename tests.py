@@ -67,7 +67,6 @@ class FlaskrTestCase(unittest.TestCase):
         postedObjectID = postResponseJSON["_id"]
 
         response = self.app.delete('/trips/'+postedObjectID)
-        responseJSON = json.loads(response.data.decode())
 
         self.assertEqual(response.status_code, 200)
         assert 'application/json' in response.content_type
@@ -96,17 +95,20 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_get_all_trips_for_user(self):
-        response = self.app.post('/trips/',
-                                 data=json.dumps(dict(
-                                     name="A Trip"
-                                     )),
-                                 content_type='application/json')
-        postResponseJSON = json.loads(response.data.decode())
-        postedObjectID = postResponseJSON["_id"]
-        response = self.app.get('/trips/'+postedObjectID)
+        self.app.post('/trips/',
+                      data=json.dumps(dict(
+                          name="A Trip"
+                          )),
+                      content_type='application/json')
+        self.app.post('/trips/',
+                      data=json.dumps(dict(
+                          name="Another Trip"
+                          )),
+                      content_type='application/json')
+        response = self.app.get('/trips/')
         responseJSON = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
-        assert 'Another object' in responseJSON["name"]
+        assert 'Another Trip' in responseJSON[1]["name"]
 
 if __name__ == '__main__':
     unittest.main()

@@ -21,15 +21,27 @@ class Trip(Resource):
             {"_id": ObjectId(result.inserted_id)})
         return trip
 
-    def get(self, trip_id):
+    def get(self, trip_id=None):
         trip_collection = app.db.trips
-        trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
-        if trip is None:
-            response = jsonify(data=[])
-            response.status_code = 404
-            return response
+        if not trip_id:
+            cursors = trip_collection.find()
+            if cursors is None:
+                response = jsonify(data=[])
+                response.status_code = 404
+                return response
+            else:
+                trips = []
+                for trip in cursors:
+                    trips.append(trip)
+                return trips
         else:
-            return trip
+            trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
+            if trip is None:
+                response = jsonify(data=[])
+                response.status_code = 404
+                return response
+            else:
+                return trip
 
     def put(self, trip_id):
         trip_collection = app.db.trips
