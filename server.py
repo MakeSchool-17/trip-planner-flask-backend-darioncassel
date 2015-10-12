@@ -25,15 +25,10 @@ class Trip(Resource):
         trip_collection = app.db.trips
         if not trip_id:
             cursors = trip_collection.find()
-            if cursors is None:
-                response = jsonify(data=[])
-                response.status_code = 404
-                return response
-            else:
-                trips = []
-                for trip in cursors:
-                    trips.append(trip)
-                return trips
+            trips = []
+            for trip in cursors:
+                trips.append(trip)
+            return trips
         else:
             trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
             if trip is None:
