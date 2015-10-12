@@ -43,7 +43,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         response = self.app.put('/trips/'+postedObjectID,
                                 data=json.dumps(dict(
-                                    name="A Trip"
+                                    name="An Updated Trip"
                                     )),
                                 content_type='application/json')
 
@@ -51,7 +51,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         assert 'application/json' in response.content_type
-        assert 'A Trip' in responseJSON["name"]
+        assert 'An Updated Trip' in responseJSON["name"]
 
     def test_update_non_existent_trip(self):
         response = self.app.put('/trips/55f0cbb4236f44b7f0e3cb23')

@@ -42,7 +42,13 @@ class Trip(Resource):
         else:
             result = trip_collection.replace_one({"_id": ObjectId(trip_id)},
                                                  request.json)
-            return result.raw_result
+            if result.modified_count == 1:
+                trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
+                return trip
+            else:
+                response = jsonify(data=[])
+                response.status_code = 204
+                return response
 
 
 # Add REST resource to API
