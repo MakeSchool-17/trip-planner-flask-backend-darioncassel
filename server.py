@@ -3,6 +3,7 @@ from flask_restful import Resource, Api
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from utils.mongo_json_encoder import JSONEncoder
+from functools import wraps
 import bcrypt
 
 # Basic Setup
@@ -39,8 +40,12 @@ class Login(Resource):
         if result:
             pw_bytes = request.json["password"].encode('utf-8')
             h_bytes = result["password"].encode('utf-8')
+            token = bcrypt.gensalt(10).decode('utf-8')
             if bcrypt.hashpw(pw_bytes, h_bytes) == h_bytes:
-                response = jsonify({"username": result["username"]})
+                response = jsonify({
+                    "username": result["username"],
+                    "token": token
+                    })
                 response.status_code = 200
                 return response
             else:
