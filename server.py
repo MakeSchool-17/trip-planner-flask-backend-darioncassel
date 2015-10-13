@@ -133,14 +133,19 @@ class Trip(Resource):
             response.status_code = 404
             return response
         else:
-            result = trip_collection.replace_one({"_id": ObjectId(trip_id)},
-                                                 request.json)
-            if result.modified_count == 1:
-                trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
-                return trip
+            if trip["username"] == request.json["username"]:
+                result = trip_collection.replace_one(
+                    {"_id": ObjectId(trip_id)}, request.json)
+                if result.modified_count == 1:
+                    trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
+                    return trip
+                else:
+                    response = jsonify(data=[])
+                    response.status_code = 500
+                    return response
             else:
                 response = jsonify(data=[])
-                response.status_code = 500
+                response.status_code = 401
                 return response
 
     @requires_auth
@@ -152,14 +157,19 @@ class Trip(Resource):
             response.status_code = 404
             return response
         else:
-            result = trip_collection.delete_one({"_id": ObjectId(trip_id)})
-            if result.deleted_count == 1:
-                response = jsonify(data=[])
-                response.status_code = 200
-                return response
+            if trip["username"] == request.json["username"]:
+                result = trip_collection.delete_one({"_id": ObjectId(trip_id)})
+                if result.deleted_count == 1:
+                    response = jsonify(data=[])
+                    response.status_code = 200
+                    return response
+                else:
+                    response = jsonify(data=[])
+                    response.status_code = 500
+                    return response
             else:
                 response = jsonify(data=[])
-                response.status_code = 500
+                response.status_code = 401
                 return response
 
 
