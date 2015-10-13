@@ -81,7 +81,7 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     user=username,
+                                     username=username,
                                      token=token
                                      )),
                                  content_type='application/json')
@@ -90,7 +90,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         assert 'application/json' in response.content_type
         assert 'A Trip' in responseJSON["name"]
-        assert 'user' in responseJSON["user"]
+        assert 'user' in responseJSON["username"]
 
     def test_update_trip(self):
         self.app.post('/register/',
@@ -112,7 +112,7 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     user=username,
+                                     username=username,
                                      token=token
                                      )),
                                  content_type='application/json')
@@ -179,7 +179,7 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     user=username,
+                                     username=username,
                                      token=token
                                      )),
                                  content_type='application/json')
@@ -241,7 +241,7 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     user=username,
+                                     username=username,
                                      token=token
                                      )),
                                  content_type='application/json')

@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from utils.mongo_json_encoder import JSONEncoder
 from functools import wraps
 import bcrypt
+import json
 
 # Basic Setup
 app = Flask(__name__)
@@ -40,8 +41,12 @@ class Login(Resource):
         if result:
             pw_bytes = request.json["password"].encode('utf-8')
             h_bytes = result["password"].encode('utf-8')
-            token = bcrypt.gensalt(10).decode('utf-8')
             if bcrypt.hashpw(pw_bytes, h_bytes) == h_bytes:
+                token = bcrypt.gensalt(10).decode('utf-8')
+                user_collection.update_one(
+                    {"username": request.json["username"]},
+                    {"$set": {"token": token}}
+                )
                 response = jsonify({
                     "username": result["username"],
                     "token": token
@@ -58,16 +63,40 @@ class Login(Resource):
             return response
 
 
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        data = json.loads(request.data.decode("utf-8"))
+        username = data["username"]
+        token = data["token"]
+        user_collection = app.db.users
+        user = user_collection.find_one({"username": username})
+        if user["token"] != token:
+            response = jsonify(data=[])
+            response.status_code = 401
+            return response
+        else:
+            return f(*args, **kwargs)
+    return decorated
+
+
 # Implement REST Resource
 class Trip(Resource):
 
+    @requires_auth
     def post(self):
         trip_collection = app.db.trips
-        result = trip_collection.insert_one(request.json)
+        trip = {
+            "name": request.json["name"],
+            "username": request.json["username"]
+        }
+        print(trip)
+        result = trip_collection.insert_one(trip)
         trip = trip_collection.find_one(
             {"_id": ObjectId(result.inserted_id)})
         return trip
 
+    @requires_auth
     def get(self, trip_id=None):
         trip_collection = app.db.trips
         if not trip_id:
@@ -85,6 +114,7 @@ class Trip(Resource):
             else:
                 return trip
 
+    @requires_auth
     def put(self, trip_id):
         trip_collection = app.db.trips
         trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
@@ -103,6 +133,7 @@ class Trip(Resource):
                 response.status_code = 500
                 return response
 
+    @requires_auth
     def delete(self, trip_id):
         trip_collection = app.db.trips
         trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
