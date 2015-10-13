@@ -136,13 +136,13 @@ class FlaskrTestCase(unittest.TestCase):
     def test_update_unauth(self):
         self.app.post('/register/',
                       data=json.dumps(dict(
-                          username="user2",
+                          username="user",
                           password="pass"
                           )),
                       content_type='application/json')
         response = self.app.post('/login/',
                                  data=json.dumps(dict(
-                                     username="user2",
+                                     username="user",
                                      password="pass"
                                      )),
                                  content_type='application/json')
@@ -150,10 +150,26 @@ class FlaskrTestCase(unittest.TestCase):
         username = responseJSON["username"]
         token = responseJSON["token"]
 
+        self.app.post('/register/',
+                      data=json.dumps(dict(
+                          username="user1",
+                          password="pass"
+                          )),
+                      content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user1",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+        username1 = responseJSON["username"]
+        token1 = responseJSON["token"]
+
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     username="user",
+                                     username=username,
                                      token=token
                                      )),
                                  content_type='application/json')
@@ -163,8 +179,8 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.put('/trips/'+postedObjectID,
                                 data=json.dumps(dict(
                                     name="An Updated Trip",
-                                    username=username,
-                                    token=token
+                                    username=username1,
+                                    token=token1
                                     )),
                                 content_type='application/json')
 
@@ -238,6 +254,22 @@ class FlaskrTestCase(unittest.TestCase):
     def test_delete_unauth(self):
         self.app.post('/register/',
                       data=json.dumps(dict(
+                          username="user",
+                          password="pass"
+                          )),
+                      content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+        username = responseJSON["username"]
+        token = responseJSON["token"]
+
+        self.app.post('/register/',
+                      data=json.dumps(dict(
                           username="user1",
                           password="pass"
                           )),
@@ -249,13 +281,13 @@ class FlaskrTestCase(unittest.TestCase):
                                      )),
                                  content_type='application/json')
         responseJSON = json.loads(response.data.decode())
-        username = responseJSON["username"]
-        token = responseJSON["token"]
+        username1 = responseJSON["username"]
+        token1 = responseJSON["token"]
 
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     username="user",
+                                     username=username,
                                      token=token
                                      )),
                                  content_type='application/json')
@@ -264,8 +296,8 @@ class FlaskrTestCase(unittest.TestCase):
 
         response = self.app.delete('/trips/'+postedObjectID,
                                    data=json.dumps(dict(
-                                       username=username,
-                                       token=token
+                                       username=username1,
+                                       token=token1
                                        )),
                                    content_type='application/json')
 
@@ -337,6 +369,22 @@ class FlaskrTestCase(unittest.TestCase):
     def test_get_trip_unauth(self):
         self.app.post('/register/',
                       data=json.dumps(dict(
+                          username="user",
+                          password="pass"
+                          )),
+                      content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+        username = responseJSON["username"]
+        token = responseJSON["token"]
+
+        self.app.post('/register/',
+                      data=json.dumps(dict(
                           username="user1",
                           password="pass"
                           )),
@@ -348,13 +396,13 @@ class FlaskrTestCase(unittest.TestCase):
                                      )),
                                  content_type='application/json')
         responseJSON = json.loads(response.data.decode())
-        username = responseJSON["username"]
-        token = responseJSON["token"]
+        username1 = responseJSON["username"]
+        token1 = responseJSON["token"]
 
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     username="user",
+                                     username=username,
                                      token=token
                                      )),
                                  content_type='application/json')
@@ -363,8 +411,8 @@ class FlaskrTestCase(unittest.TestCase):
 
         response = self.app.get('/trips/'+postedObjectID,
                                 data=json.dumps(dict(
-                                    username=username,
-                                    token=token
+                                    username=username1,
+                                    token=token1
                                     )),
                                 content_type='application/json')
         responseJSON = json.loads(response.data.decode())

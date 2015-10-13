@@ -71,12 +71,17 @@ def requires_auth(f):
         token = data["token"]
         user_collection = app.db.users
         user = user_collection.find_one({"username": username})
-        if user["token"] != token:
+        if user:
+            if user["token"] != token:
+                response = jsonify(data=[])
+                response.status_code = 401
+                return response
+            else:
+                return f(*args, **kwargs)
+        else:
             response = jsonify(data=[])
             response.status_code = 401
             return response
-        else:
-            return f(*args, **kwargs)
     return decorated
 
 
