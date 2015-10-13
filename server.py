@@ -3,12 +3,54 @@ from flask_restful import Resource, Api
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from utils.mongo_json_encoder import JSONEncoder
+import bcrypt
 
 # Basic Setup
 app = Flask(__name__)
 mongo = MongoClient('localhost', 27017)
 app.db = mongo.develop_database
 api = Api(app)
+
+
+# Implement REST Resource
+class Register(Resource):
+
+    def post(self):
+        user_collection = app.db.users
+        pw_bytes = request.json["password"].encode('utf-8')
+        hashed = bcrypt.hashpw(pw_bytes, bcrypt.gensalt(12))
+        user = {
+            "username": request.json["username"],
+            "password": hashed.decode('utf-8')
+        }
+        result = user_collection.insert_one(user)
+        user = user_collection.find_one(
+            {"_id": ObjectId(result.inserted_id)})
+        return user
+
+
+# Implement REST Resource
+class Login(Resource):
+
+    def post(self):
+        user_collection = app.db.users
+        result = user_collection.find_one(
+            {"username": request.json["username"]})
+        if result:
+            pw_bytes = request.json["password"].encode('utf-8')
+            h_bytes = result["password"].encode('utf-8')
+            if bcrypt.hashpw(pw_bytes, h_bytes) == h_bytes:
+                response = jsonify({"username": result["username"]})
+                response.status_code = 200
+                return response
+            else:
+                response = jsonify(data=[])
+                response.status_code = 401
+                return response
+        else:
+            response = jsonify(data=[])
+            response.status_code = 401
+            return response
 
 
 # Implement REST Resource
@@ -75,8 +117,10 @@ class Trip(Resource):
                 return response
 
 
-# Add REST resource to API
+# Add REST resources to API
 api.add_resource(Trip, '/trips/', '/trips/<string:trip_id>')
+api.add_resource(Register, '/register/')
+api.add_resource(Login, '/login/')
 
 
 # provide a custom JSON serializer for flaks_restful

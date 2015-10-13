@@ -16,9 +16,51 @@ class FlaskrTestCase(unittest.TestCase):
         server.app.db = db
         # Drop collection (significantly faster than dropping entire db)
         db.drop_collection('trips')
+        db.drop_collection('users')
+
+    # Test auth
+    def test_register_user(self):
+        response = self.app.post('/register/',
+                                 data=json.dumps(dict(
+                                     username="user",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+
+        self.assertEqual(response.status_code, 200)
+        assert 'application/json' in response.content_type
+        assert 'user' in responseJSON["username"]
+
+    def test_auth_user(self):
+        response = self.app.post('/register/',
+                                 data=json.dumps(dict(
+                                     username="user",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+
+        self.assertEqual(response.status_code, 200)
+        assert 'application/json' in response.content_type
+        assert 'user' in responseJSON["username"]
+
+    def test_unauthorized_user(self):
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="something",
+                                     password="wrong"
+                                     )),
+                                 content_type='application/json')
+        self.assertEqual(response.status_code, 401)
 
     # Trip tests
-
     def test_create_trip(self):
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
