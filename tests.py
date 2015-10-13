@@ -122,6 +122,7 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.put('/trips/'+postedObjectID,
                                 data=json.dumps(dict(
                                     name="An Updated Trip",
+                                    username=username,
                                     token=token
                                     )),
                                 content_type='application/json')
@@ -146,11 +147,13 @@ class FlaskrTestCase(unittest.TestCase):
                                      )),
                                  content_type='application/json')
         responseJSON = json.loads(response.data.decode())
+        username = responseJSON["username"]
         token = responseJSON["token"]
 
         response = self.app.put('/trips/55f0cbb4236f44b7f0e3cb23',
                                 data=json.dumps(dict(
                                     name="An Updated Trip",
+                                    username=username,
                                     token=token
                                     )),
                                 content_type='application/json')
@@ -176,7 +179,7 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     username=username,
+                                     user=username,
                                      token=token
                                      )),
                                  content_type='application/json')
@@ -185,6 +188,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         response = self.app.delete('/trips/'+postedObjectID,
                                    data=json.dumps(dict(
+                                       username=username,
                                        token=token
                                        )),
                                    content_type='application/json')
@@ -193,7 +197,28 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'application/json' in response.content_type
 
     def test_delete_non_existent_trip(self):
-        response = self.app.delete('/trips/55f0cbb4236f44b7f0e3cb23')
+        self.app.post('/register/',
+                      data=json.dumps(dict(
+                          username="user",
+                          password="pass"
+                          )),
+                      content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+        username = responseJSON["username"]
+        token = responseJSON["token"]
+
+        response = self.app.delete('/trips/55f0cbb4236f44b7f0e3cb23',
+                                   data=json.dumps(dict(
+                                       username=username,
+                                       token=token
+                                   )),
+                                   content_type='application/json')
         self.assertEqual(response.status_code, 404)
 
     def test_get_trip_by_id(self):
@@ -216,14 +241,19 @@ class FlaskrTestCase(unittest.TestCase):
         response = self.app.post('/trips/',
                                  data=json.dumps(dict(
                                      name="A Trip",
-                                     username=username,
+                                     user=username,
                                      token=token
                                      )),
                                  content_type='application/json')
         postResponseJSON = json.loads(response.data.decode())
         postedObjectID = postResponseJSON["_id"]
 
-        response = self.app.get('/trips/'+postedObjectID)
+        response = self.app.get('/trips/'+postedObjectID,
+                                data=json.dumps(dict(
+                                    username=username,
+                                    token=token
+                                    )),
+                                content_type='application/json')
         responseJSON = json.loads(response.data.decode())
 
         self.assertEqual(response.status_code, 200)
@@ -247,7 +277,10 @@ class FlaskrTestCase(unittest.TestCase):
         token = responseJSON["token"]
 
         response = self.app.get('/trips/55f0cbb4236f44b7f0e3cb23',
-                                data=json.dumps(dict(token=token)),
+                                data=json.dumps(dict(
+                                    username=username,
+                                    token=token
+                                    )),
                                 content_type="application/json")
         self.assertEqual(response.status_code, 404)
 
@@ -270,17 +303,23 @@ class FlaskrTestCase(unittest.TestCase):
 
         self.app.post('/trips/',
                       data=json.dumps(dict(
-                          name="A Trip"
+                          name="A Trip",
+                          username=username,
+                          token=token
                           )),
                       content_type='application/json')
         self.app.post('/trips/',
                       data=json.dumps(dict(
-                          name="Another Trip"
+                          name="Another Trip",
+                          username=username,
+                          token=token
                           )),
                       content_type='application/json')
         response = self.app.get('/trips/',
-                                data=json.dumps(dict(username=username,
-                                                     token=token)),
+                                data=json.dumps(dict(
+                                    username=username,
+                                    token=token
+                                    )),
                                 content_type="application/json")
 
         responseJSON = json.loads(response.data.decode())
