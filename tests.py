@@ -133,6 +133,45 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'application/json' in response.content_type
         assert 'An Updated Trip' in responseJSON["name"]
 
+    def test_update_unauth(self):
+        self.app.post('/register/',
+                      data=json.dumps(dict(
+                          username="user2",
+                          password="pass"
+                          )),
+                      content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user2",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+        username = responseJSON["username"]
+        token = responseJSON["token"]
+
+        response = self.app.post('/trips/',
+                                 data=json.dumps(dict(
+                                     name="A Trip",
+                                     username="user",
+                                     token=token
+                                     )),
+                                 content_type='application/json')
+        postResponseJSON = json.loads(response.data.decode())
+        postedObjectID = postResponseJSON["_id"]
+
+        response = self.app.put('/trips/'+postedObjectID,
+                                data=json.dumps(dict(
+                                    name="An Updated Trip",
+                                    username=username,
+                                    token=token
+                                    )),
+                                content_type='application/json')
+
+        responseJSON = json.loads(response.data.decode())
+
+        self.assertEqual(response.status_code, 401)
+
     def test_update_non_existent_trip(self):
         self.app.post('/register/',
                       data=json.dumps(dict(
@@ -196,6 +235,42 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         assert 'application/json' in response.content_type
 
+    def test_delete_unauth(self):
+        self.app.post('/register/',
+                      data=json.dumps(dict(
+                          username="user1",
+                          password="pass"
+                          )),
+                      content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user1",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+        username = responseJSON["username"]
+        token = responseJSON["token"]
+
+        response = self.app.post('/trips/',
+                                 data=json.dumps(dict(
+                                     name="A Trip",
+                                     username="user",
+                                     token=token
+                                     )),
+                                 content_type='application/json')
+        postResponseJSON = json.loads(response.data.decode())
+        postedObjectID = postResponseJSON["_id"]
+
+        response = self.app.delete('/trips/'+postedObjectID,
+                                   data=json.dumps(dict(
+                                       username=username,
+                                       token=token
+                                       )),
+                                   content_type='application/json')
+
+        self.assertEqual(response.status_code, 401)
+
     def test_delete_non_existent_trip(self):
         self.app.post('/register/',
                       data=json.dumps(dict(
@@ -258,6 +333,43 @@ class FlaskrTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         assert 'A Trip' in responseJSON["name"]
+
+    def test_get_trip_unauth(self):
+        self.app.post('/register/',
+                      data=json.dumps(dict(
+                          username="user1",
+                          password="pass"
+                          )),
+                      content_type='application/json')
+        response = self.app.post('/login/',
+                                 data=json.dumps(dict(
+                                     username="user1",
+                                     password="pass"
+                                     )),
+                                 content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+        username = responseJSON["username"]
+        token = responseJSON["token"]
+
+        response = self.app.post('/trips/',
+                                 data=json.dumps(dict(
+                                     name="A Trip",
+                                     username="user",
+                                     token=token
+                                     )),
+                                 content_type='application/json')
+        postResponseJSON = json.loads(response.data.decode())
+        postedObjectID = postResponseJSON["_id"]
+
+        response = self.app.get('/trips/'+postedObjectID,
+                                data=json.dumps(dict(
+                                    username=username,
+                                    token=token
+                                    )),
+                                content_type='application/json')
+        responseJSON = json.loads(response.data.decode())
+
+        self.assertEqual(response.status_code, 401)
 
     def test_get_non_existent_trip(self):
         self.app.post('/register/',

@@ -90,7 +90,6 @@ class Trip(Resource):
             "name": request.json["name"],
             "username": request.json["username"]
         }
-        print(trip)
         result = trip_collection.insert_one(trip)
         trip = trip_collection.find_one(
             {"_id": ObjectId(result.inserted_id)})
@@ -100,7 +99,8 @@ class Trip(Resource):
     def get(self, trip_id=None):
         trip_collection = app.db.trips
         if not trip_id:
-            cursors = trip_collection.find()
+            cursors = trip_collection.find(
+                {"username": request.json["username"]})
             trips = []
             for trip in cursors:
                 trips.append(trip)
@@ -112,7 +112,12 @@ class Trip(Resource):
                 response.status_code = 404
                 return response
             else:
-                return trip
+                if trip["username"] == request.json["username"]:
+                    return trip
+                else:
+                    response = jsonify(data=[])
+                    response.status_code = 401
+                    return response
 
     @requires_auth
     def put(self, trip_id):
