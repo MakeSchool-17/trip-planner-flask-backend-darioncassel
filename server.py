@@ -28,6 +28,9 @@ class Register(Resource):
         result = user_collection.insert_one(user)
         user = user_collection.find_one(
             {"_id": ObjectId(result.inserted_id)})
+        #TODO: it would be best to remove the password from the user dictionary, 
+        #that way the client never gets to see the encrypted password
+        #that makes the service more secure becuase the client can't guess the encryption algorithm
         return user
 
 
@@ -104,6 +107,9 @@ class Trip(Resource):
     def get(self, trip_id=None):
         trip_collection = app.db.trips
         if not trip_id:
+            # TODO: you can convert the results into a list
+            # using the list() function that way you don't need to iterate over
+            # the cursor
             cursors = trip_collection.find(
                 {"username": request.json["username"]})
             trips = []
@@ -117,6 +123,8 @@ class Trip(Resource):
                 response.status_code = 404
                 return response
             else:
+                #TODO: instead of checking for the username here, you can
+                # include the username as part of the DB query
                 if trip["username"] == request.json["username"]:
                     return trip
                 else:
@@ -133,6 +141,8 @@ class Trip(Resource):
             response.status_code = 404
             return response
         else:
+            #TODO: instead of checking for the username here, you can
+            # include the username as part of the DB query
             if trip["username"] == request.json["username"]:
                 result = trip_collection.replace_one(
                     {"_id": ObjectId(trip_id)}, request.json)
@@ -157,6 +167,8 @@ class Trip(Resource):
             response.status_code = 404
             return response
         else:
+            #TODO: instead of checking for the username here, you can
+            # include the username as part of the DB query
             if trip["username"] == request.json["username"]:
                 result = trip_collection.delete_one({"_id": ObjectId(trip_id)})
                 if result.deleted_count == 1:
