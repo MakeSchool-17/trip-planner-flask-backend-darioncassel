@@ -3,7 +3,8 @@ import unittest
 import json
 from pymongo import MongoClient
 
-
+#TODO: you could consider moving some of the test code (e.g. signing up and logging in a user) into separate
+# method, that would avoid some duplication of the test code
 class FlaskrTestCase(unittest.TestCase):
 
     def setUp(self):
