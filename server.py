@@ -28,6 +28,8 @@ class Register(Resource):
         result = user_collection.insert_one(user)
         user = user_collection.find_one(
             {"_id": ObjectId(result.inserted_id)})
+        # TODO: don't send hashed password
+        # RESOLVE: send back select user data
         if user:
             response = jsonify({
                 "username": user["username"]
@@ -113,14 +115,10 @@ class Trip(Resource):
     def get(self, trip_id=None):
         trip_collection = app.db.trips
         if not trip_id:
-            # TODO: you can convert the results into a list
-            # using the list() function that way you don't need to iterate over
-            # the cursor
-            cursors = trip_collection.find(
-                {"username": request.json["username"]})
-            trips = []
-            for trip in cursors:
-                trips.append(trip)
+            # TODO: convert cursors to list
+            # Resolve: cursors -> trips = list(cursors)
+            trips = list(trip_collection.find(
+                {"username": request.json["username"]}))
             return trips
         else:
             trip = trip_collection.find_one({"_id": ObjectId(trip_id)})
@@ -129,8 +127,9 @@ class Trip(Resource):
                 response.status_code = 404
                 return response
             else:
-                #TODO: instead of checking for the username here, you can
-                # include the username as part of the DB query
+                # TODO: instead of checking for the username here, you can
+                # QUESTION: what if I want to be able to distinguish between
+                # a non-existent and unauthorized trip?
                 if trip["username"] == request.json["username"]:
                     return trip
                 else:

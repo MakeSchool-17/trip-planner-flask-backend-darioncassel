@@ -3,8 +3,9 @@ import unittest
 import json
 from pymongo import MongoClient
 
-#TODO: you could consider moving some of the test code (e.g. signing up and logging in a user) into separate
-# method, that would avoid some duplication of the test code
+
+# TODO: move signing up and logging in a user into separate method
+# RESOLVE: see __register_and_login()
 class FlaskrTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -63,20 +64,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     # Trip tests
     def test_create_trip(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
-
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
         response = self.app.post('/trips/',
@@ -94,19 +82,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'user' in responseJSON["username"]
 
     def test_update_trip(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
@@ -135,35 +111,11 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'An Updated Trip' in responseJSON["name"]
 
     def test_update_unauth(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user1",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user1",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user1", "pass")
         username1 = responseJSON["username"]
         token1 = responseJSON["token"]
 
@@ -190,19 +142,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_update_non_existent_trip(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
@@ -216,19 +156,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_delete_trip(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
@@ -253,35 +181,11 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'application/json' in response.content_type
 
     def test_delete_unauth(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user1",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user1",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user1", "pass")
         username1 = responseJSON["username"]
         token1 = responseJSON["token"]
 
@@ -305,19 +209,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_delete_non_existent_trip(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
@@ -330,19 +222,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_get_trip_by_id(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
@@ -368,35 +248,11 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'A Trip' in responseJSON["name"]
 
     def test_get_trip_unauth(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user1",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user1",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user1", "pass")
         username1 = responseJSON["username"]
         token1 = responseJSON["token"]
 
@@ -421,19 +277,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_get_non_existent_trip(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
@@ -446,19 +290,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_get_all_trips_for_user(self):
-        self.app.post('/register/',
-                      data=json.dumps(dict(
-                          username="user",
-                          password="pass"
-                          )),
-                      content_type='application/json')
-        response = self.app.post('/login/',
-                                 data=json.dumps(dict(
-                                     username="user",
-                                     password="pass"
-                                     )),
-                                 content_type='application/json')
-        responseJSON = json.loads(response.data.decode())
+        responseJSON = self.__register_and_login("user", "pass")
         username = responseJSON["username"]
         token = responseJSON["token"]
 
@@ -486,6 +318,22 @@ class FlaskrTestCase(unittest.TestCase):
         responseJSON = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         assert 'Another Trip' in responseJSON[1]["name"]
+
+    def __register_and_login(self, user, passw):
+            self.app.post('/register/',
+                          data=json.dumps(dict(
+                              username=user,
+                              password=passw
+                              )),
+                          content_type='application/json')
+            response = self.app.post('/login/',
+                                     data=json.dumps(dict(
+                                         username=user,
+                                         password=passw
+                                         )),
+                                     content_type='application/json')
+            responseJSON = json.loads(response.data.decode())
+            return responseJSON
 
 if __name__ == '__main__':
     unittest.main()
