@@ -28,10 +28,16 @@ class Register(Resource):
         result = user_collection.insert_one(user)
         user = user_collection.find_one(
             {"_id": ObjectId(result.inserted_id)})
-        #TODO: it would be best to remove the password from the user dictionary, 
-        #that way the client never gets to see the encrypted password
-        #that makes the service more secure becuase the client can't guess the encryption algorithm
-        return user
+        if user:
+            response = jsonify({
+                "username": user["username"]
+            })
+            response.status_code = 200
+            return response
+        else:
+            response = jsonify(data=[])
+            response.status_code = 500
+            return response
 
 
 # Implement REST Resource
