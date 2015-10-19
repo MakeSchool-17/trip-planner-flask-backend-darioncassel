@@ -28,8 +28,6 @@ class Register(Resource):
         result = user_collection.insert_one(user)
         user = user_collection.find_one(
             {"_id": ObjectId(result.inserted_id)})
-        # TODO: don't send hashed password
-        # RESOLVE: send back select user data
         if user:
             response = jsonify({
                 "username": user["username"]
@@ -115,8 +113,6 @@ class Trip(Resource):
     def get(self, trip_id=None):
         trip_collection = app.db.trips
         if not trip_id:
-            # TODO: convert cursors to list
-            # Resolve: cursors -> trips = list(cursors)
             trips = list(trip_collection.find(
                 {"username": request.json["username"]}))
             return trips
@@ -127,9 +123,6 @@ class Trip(Resource):
                 response.status_code = 404
                 return response
             else:
-                # TODO: instead of checking for the username here, you can
-                # QUESTION: what if I want to be able to distinguish between
-                # a non-existent and unauthorized trip?
                 if trip["username"] == request.json["username"]:
                     return trip
                 else:
@@ -146,8 +139,6 @@ class Trip(Resource):
             response.status_code = 404
             return response
         else:
-            #TODO: instead of checking for the username here, you can
-            # include the username as part of the DB query
             if trip["username"] == request.json["username"]:
                 result = trip_collection.replace_one(
                     {"_id": ObjectId(trip_id)}, request.json)
@@ -172,8 +163,6 @@ class Trip(Resource):
             response.status_code = 404
             return response
         else:
-            #TODO: instead of checking for the username here, you can
-            # include the username as part of the DB query
             if trip["username"] == request.json["username"]:
                 result = trip_collection.delete_one({"_id": ObjectId(trip_id)})
                 if result.deleted_count == 1:

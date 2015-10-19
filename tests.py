@@ -4,8 +4,6 @@ import json
 from pymongo import MongoClient
 
 
-# TODO: move signing up and logging in a user into separate method
-# RESOLVE: see __register_and_login()
 class FlaskrTestCase(unittest.TestCase):
 
     def setUp(self):
